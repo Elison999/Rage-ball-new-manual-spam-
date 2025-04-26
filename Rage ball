@@ -1,0 +1,92 @@
+-- Manual Spam Click com seletor de velocidade (Mobile)
+
+-- Serviços
+local VirtualInput = game:GetService("VirtualInputManager")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Criar GUI
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "ManualSpamGui"
+screenGui.ResetOnSpawn = false
+
+-- Botão principal de Spam
+local spamButton = Instance.new("TextButton", screenGui)
+spamButton.Size = UDim2.new(0, 120, 0, 40)
+spamButton.Position = UDim2.new(0.5, -60, 0.8, 0)
+spamButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+spamButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+spamButton.Text = "Spam OFF"
+spamButton.TextScaled = true
+spamButton.Font = Enum.Font.SourceSansBold
+spamButton.BorderSizePixel = 2
+
+-- Botão [+x]
+local plusButton = Instance.new("TextButton", screenGui)
+plusButton.Size = UDim2.new(0, 40, 0, 40)
+plusButton.Position = UDim2.new(0.5, 65, 0.8, 0) -- Do lado do botão principal
+plusButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+plusButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+plusButton.Text = "+x"
+plusButton.TextScaled = true
+plusButton.Font = Enum.Font.SourceSansBold
+plusButton.BorderSizePixel = 2
+
+-- Variáveis
+local isSpamming = false
+local baseDelay = 0.000000000000000000000000000000001
+local clickDelay = baseDelay
+local speedButtonsVisible = false
+
+-- Função para criar botões de velocidade
+local function createSpeedButton(text, multiplier, positionX)
+	local btn = Instance.new("TextButton", screenGui)
+	btn.Size = UDim2.new(0, 40, 0, 30)
+	btn.Position = UDim2.new(0.5, positionX, 0.75, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Text = text.."x"
+	btn.TextScaled = true
+	btn.Font = Enum.Font.SourceSansBold
+	btn.BorderSizePixel = 1
+	btn.Visible = false
+
+	btn.MouseButton1Click:Connect(function()
+		clickDelay = baseDelay / multiplier
+	end)
+
+	return btn
+end
+
+-- Criar botões 2x 3x 4x 5x
+local speed2x = createSpeedButton("2", -100)
+local speed3x = createSpeedButton("3", -50)
+local speed4x = createSpeedButton("4", 0)
+local speed5x = createSpeedButton("5", 50)
+
+local speedButtons = {speed2x, speed3x, speed4x, speed5x}
+
+-- Função para mostrar ou esconder os botões de velocidade
+plusButton.MouseButton1Click:Connect(function()
+	speedButtonsVisible = not speedButtonsVisible
+	for _, btn in ipairs(speedButtons) do
+		btn.Visible = speedButtonsVisible
+	end
+end)
+
+-- Botão principal para ligar/desligar o spam
+spamButton.MouseButton1Click:Connect(function()
+	isSpamming = not isSpamming
+	spamButton.Text = isSpamming and "Spam ON" or "Spam OFF"
+end)
+
+-- Loop de spam
+task.spawn(function()
+	while true do
+		if isSpamming then
+			VirtualInput:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+			VirtualInput:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+		end
+		task.wait(clickDelay)
+	end
+end)
